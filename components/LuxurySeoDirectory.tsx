@@ -1,7 +1,8 @@
 import { Shield, Sparkles, Home, Hotel, Heart, ChevronRight, Award, Compass, Search } from 'lucide-react';
+import { Language } from '../types';
 
 interface LuxurySeoDirectoryProps {
-  language: 'fr' | 'en';
+  language: Language;
 }
 
 export default function LuxurySeoDirectory({ language }: LuxurySeoDirectoryProps) {

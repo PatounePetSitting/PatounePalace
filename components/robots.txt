@@ -1,0 +1,39 @@
+# Specific Crawler settings for Google, Bing, and major AI search agents
+User-agent: *
+Allow: /
+
+# Specifically allow AI crawlers to scan the full site and llms.txt
+User-agent: GPTBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: ChatGPT-User
+Allow: /
+Allow: /llms.txt
+
+User-agent: ClaudeBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: Claude-Web
+Allow: /
+Allow: /llms.txt
+
+User-agent: Google-Extended
+Allow: /
+Allow: /llms.txt
+
+User-agent: PerplexityBot
+Allow: /
+Allow: /llms.txt
+
+User-agent: cohere-ai
+Allow: /
+Allow: /llms.txt
+
+User-agent: facebookexternalhit
+Allow: /
+
+# Provide sitemap pointer and direct AI metadata link
+Sitemap: /sitemap.xml
+Link: /llms.txt; rel="llms"

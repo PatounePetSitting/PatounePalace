@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Testimonial } from '../types';
+import { Testimonial, Language } from '../types';
 import { Star, Quote, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface TestimonialsProps {
   testimonials: Testimonial[];
-  language: 'fr' | 'en';
+  language: Language;
   translations: any;
 }
 
@@ -43,6 +43,25 @@ export default function Testimonials({ testimonials, language, translations }: T
     setDirection(index > currentIndex ? 1 : -1);
     setCurrentIndex(index);
   };
+
+  if (!testimonials || testimonials.length === 0) {
+    return (
+      <div className="space-y-12">
+        {/* Header Section */}
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <h2 className="text-3xl sm:text-4xl font-serif font-extrabold text-charcoal-luxe tracking-tight">
+            <span>{translations[language].reviewsTitle}</span>
+          </h2>
+          <p className="text-stone-600 text-sm md:text-base">
+            {translations[language].reviewsSubtitle}
+          </p>
+        </div>
+        <div className="text-center py-12 text-stone-400 text-sm font-mono">
+          {language === 'fr' ? "Aucun avis client disponible pour le moment." : "No client reviews available at the moment."}
+        </div>
+      </div>
+    );
+  }
 
   const activeTestimonial = testimonials[currentIndex];
 
@@ -116,7 +135,7 @@ export default function Testimonials({ testimonials, language, translations }: T
         </div>
 
         {/* Carousel Card Container */}
-        <div className="min-h-[380px] sm:min-h-[340px] flex items-center justify-center relative overflow-hidden bg-white/60 backdrop-blur-md rounded-3xl border-2 border-stone-200/90 shadow-xl p-6 sm:p-10 md:p-12">
+        <div className="min-h-[420px] sm:min-h-[380px] flex items-center justify-center relative overflow-hidden bg-white/60 backdrop-blur-md rounded-3xl border-2 border-stone-200/90 shadow-xl p-6 sm:p-10 md:p-12">
           
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
@@ -128,43 +147,56 @@ export default function Testimonials({ testimonials, language, translations }: T
               exit="exit"
               className="w-full space-y-6 md:space-y-8 flex flex-col justify-between"
             >
-              <div className="space-y-6">
-                {/* Header elements inside the card: Pet sticker, rating & date */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  {/* Pet Name & Badge */}
-                  <div className="inline-flex items-center gap-2 self-start bg-amber-500/10 text-amber-800 text-sm font-bold px-3.5 py-1.5 rounded-xl border border-amber-500/25 shadow-2xs">
-                    <Heart className="h-4 w-4 text-amber-600 fill-amber-600" />
-                    <span>
-                      {activeTestimonial.petName} — {activeTestimonial.petType === 'dog' ? (language === 'fr' ? '🐶 Golden Retriever d\'Exception' : '🐶 Premium Golden Retriever') : activeTestimonial.petType === 'cat' ? (language === 'fr' ? '🐱 Chat Royal' : '🐱 Royal Cat') : '🐹 NAC'}
+              <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center md:items-start">
+                {activeTestimonial.image && (
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 shrink-0 rounded-2xl overflow-hidden border-2 border-amber-500/20 shadow-md bg-stone-50 relative group">
+                    <img 
+                      src={activeTestimonial.image} 
+                      alt={activeTestimonial.petName} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex-grow space-y-5 w-full">
+                  {/* Header elements inside the card: Pet sticker, rating & date */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    {/* Pet Name & Badge */}
+                    <div className="inline-flex items-center gap-2 self-start bg-amber-500/10 text-amber-800 text-sm font-bold px-3.5 py-1.5 rounded-xl border border-amber-500/25 shadow-2xs">
+                      <Heart className="h-4 w-4 text-amber-600 fill-amber-600" />
+                      <span>
+                        {activeTestimonial.petName} — {activeTestimonial.petType === 'dog' ? (language === 'fr' ? '🐶 Chien Adoré' : '🐶 Beloved Dog') : activeTestimonial.petType === 'cat' ? (language === 'fr' ? '🐱 Chat Royal' : '🐱 Royal Cat') : '🐹 Autre'}
+                      </span>
+                    </div>
+
+                    {/* Verified tag */}
+                    <span className="text-[11px] select-none uppercase font-mono tracking-widest font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 self-start sm:self-auto">
+                      ✓ {translations[language].verifiedOwner}
                     </span>
                   </div>
 
-                  {/* Verified tag */}
-                  <span className="text-[11px] select-none uppercase font-mono tracking-widest font-black text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100 self-start sm:self-auto">
-                    ✓ {translations[language].verifiedOwner}
-                  </span>
-                </div>
-
-                {/* Highly Prominent Luxury Golden Review Rating Box */}
-                <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-4 sm:p-5 rounded-2xl border-2 border-amber-500/40 shadow-sm inline-flex flex-col sm:flex-row items-center gap-4.5">
-                  <div className="flex items-center gap-1.5 shrink-0 bg-white/85 px-3 py-1.5 rounded-lg border border-amber-500/20 shadow-2xs">
-                    {renderStars(activeTestimonial.rating)}
+                  {/* Highly Prominent Luxury Golden Review Rating Box */}
+                  <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent p-4 sm:p-5 rounded-2xl border-2 border-amber-500/40 shadow-sm inline-flex flex-col sm:flex-row items-center gap-4.5">
+                    <div className="flex items-center gap-1.5 shrink-0 bg-white/85 px-3 py-1.5 rounded-lg border border-amber-500/20 shadow-2xs">
+                      {renderStars(activeTestimonial.rating)}
+                    </div>
+                    <div className="text-center sm:text-left">
+                      <span className="block text-xs font-black text-amber-800 uppercase tracking-widest font-mono">
+                        {language === 'fr' ? `NOTATION EXCELLENCE : ${activeTestimonial.rating.toFixed(1)} / 5.0` : `EXCELLENCE SCORE: ${activeTestimonial.rating.toFixed(1)} / 5.0`}
+                      </span>
+                      <span className="text-[11px] text-stone-500 font-sans block mt-0.5">
+                        {language === 'fr' ? "Services hôteliers & villas de grand luxe approuvés" : "Approved for luxury hotel & private villa stays"}
+                      </span>
+                    </div>
                   </div>
-                  <div className="text-center sm:text-left">
-                    <span className="block text-xs font-black text-amber-800 uppercase tracking-widest font-mono">
-                      {language === 'fr' ? "NOTATION EXCELLENCE : 5.0 / 5.0" : "EXCELLENCE SCORE: 5.0 / 5.0"}
-                    </span>
-                    <span className="text-[11px] text-stone-500 font-sans block mt-0.5">
-                      {language === 'fr' ? "Services hôteliers & villas de grand luxe approuvés" : "Approved for luxury hotel & private villa stays"}
-                    </span>
-                  </div>
-                </div>
 
-                {/* Review Core text with gorgeous typography */}
-                <div className="pt-2">
-                  <p className="text-stone-850 text-base sm:text-lg md:text-xl font-medium italic leading-relaxed text-stone-800 font-serif">
-                    "{activeTestimonial.comment[language]}"
-                  </p>
+                  {/* Review Core text with gorgeous typography */}
+                  <div className="pt-2">
+                    <p className="text-stone-850 text-base sm:text-lg md:text-xl font-medium italic leading-relaxed text-stone-800 font-serif">
+                      "{activeTestimonial.comment[language] || activeTestimonial.comment.fr || activeTestimonial.comment.en}"
+                    </p>
+                  </div>
                 </div>
               </div>
 

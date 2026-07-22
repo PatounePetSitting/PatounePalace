@@ -1,0 +1,6 @@
+{
+  "name": "Patoune Nice Cannes Monaco",
+  "description": "Conciergerie et garde d'animaux (pet sitting) ultra-luxe pour Palaces, Hôtels 5 étoiles, Villas et Yachts de prestige à Nice, Cannes et Monaco. Système de réservation directe, tarifs professionnels B2B, galerie photos d'exception et blog de conciergerie bilingue (FR/EN).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
