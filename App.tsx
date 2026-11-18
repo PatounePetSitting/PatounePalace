@@ -1,612 +1,511 @@
-import { useState, useRef } from 'react';
-import { BLOG_POSTS, TESTIMONIALS } from './data';
-import { translations } from './translations';
-import { BlogPost } from './types';
-import Testimonials from './components/Testimonials';
-import ContactVip from './components/ContactVip';
-import BlogSection from './components/BlogSection';
-import ConciergeSection from './components/ConciergeSection';
-import AboutSophie from './components/AboutSophie';
-import { Sparkles, Calendar, Menu, X, Landmark, Globe, Heart, Phone, Award, ShieldAlert } from 'lucide-react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { CONTACT, IMG, T, ZONES, type Lang } from './content';
+
+const SECTION = 'mx-auto w-full max-w-6xl px-5 sm:px-8';
+const BTN =
+  'inline-flex items-center justify-center rounded-full px-6 py-3 text-sm font-bold transition focus:outline-none focus-visible:ring-4 focus-visible:ring-sky-deep/50';
+
+function initialLang(): Lang {
+  try {
+    const saved = localStorage.getItem('lang');
+    if (saved === 'fr' || saved === 'en') return saved;
+  } catch {
+    /* storage unavailable */
+  }
+  return typeof navigator !== 'undefined' && navigator.language?.toLowerCase().startsWith('fr') ? 'fr' : 'en';
+}
+
+function Eyebrow({ children }: { children: string }) {
+  return (
+    <p className="mb-3 text-center text-xs font-bold uppercase tracking-[0.2em] text-navy/50">· {children} ·</p>
+  );
+}
 
 export default function App() {
-  const [language, setLanguage] = useState<'fr' | 'en'>('fr');
-  const [blogPosts, setBlogPosts] = useState<BlogPost[]>(BLOG_POSTS);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'where' | 'safety' | 'pricing' | 'contact'>('where');
+  const [lang, setLang] = useState<Lang>(initialLang);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  // Toggle language translation dictionary
-  const toggleLanguage = () => {
-    setLanguage(prev => (prev === 'fr' ? 'en' : 'fr'));
-  };
-
-  const scrollToSection = (id: string) => {
-    setMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    try {
+      localStorage.setItem('lang', lang);
+    } catch {
+      /* ignore */
     }
-  };
+  }, [lang]);
 
-  // Click tier package inside pricing card -> scrolls smooth
-  const handleSelectPlanFromPricing = (planName: string) => {
-    const element = document.getElementById('reservation-section');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  // Add customized blog draft locally
-  const handleAddNewPost = (newPost: BlogPost) => {
-    setBlogPosts(prev => [newPost, ...prev]);
-  };
+  const links = [
+    { href: '#services', label: T.nav.services[lang] },
+    { href: '#about', label: T.nav.about[lang] },
+    { href: '#avis', label: T.nav.reviews[lang] },
+    { href: '#faq', label: T.nav.faq[lang] },
+  ];
 
   return (
-    <div className="min-h-screen bg-villa-cream text-stone-750 font-sans selection:bg-riviera-sand selection:text-riviera-deep leading-normal scroll-smooth">
-      {/* Upper Top Minimal Announcement Bar */}
-      <div className="bg-stone-950 text-stone-100 py-3 px-4 text-center text-[11px] md:text-xs font-mono tracking-wider uppercase flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-6 border-b border-stone-900">
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-white animate-pulse"></span>
-          <span className="font-extrabold tracking-widest text-white">
-            {language === 'fr' 
-              ? "Service agréé pour Hôtels de Luxe & Conciergeries 5★ (Nice • Cannes • Monaco)" 
-              : "Bespoke Pet Care Partner for Luxury Hotels & 5★ Concierges (Nice • Cannes • Monaco)"}
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="hidden sm:inline text-white/20">|</span>
-          <a href="tel:+33763208713" className="text-white font-black hover:underline flex items-center gap-1.5 text-xs">
-            <Phone className="h-3 w-3 text-white shrink-0 animate-bounce" />
-            <span>+33 (0)7 63 20 87 13</span>
+    <div className="min-h-screen">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2">
+        {lang === 'fr' ? 'Aller au contenu' : 'Skip to content'}
+      </a>
+
+      {/* Header */}
+      <header className="sticky top-0 z-40 border-b border-navy/5 bg-cream/90 backdrop-blur">
+        <div className={`${SECTION} flex h-16 items-center justify-between`}>
+          <a href="#top" className="font-display text-xl font-semibold tracking-tight">
+            🐾 Patoune <span className="text-navy/50">Côte d’Azur</span>
           </a>
-        </div>
-      </div>
-
-      {/* Main Premium Sticky Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-stone-150/80 transition-all shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          
-          {/* Brand Logo & Name */}
-          <div 
-            onClick={() => scrollToSection('hero-section')} 
-            className="flex items-center gap-3 cursor-pointer group"
-          >
-            <span className="h-11 w-11 rounded-full overflow-hidden border border-black flex items-center justify-center bg-white shadow-sm group-hover:scale-105 transition-all duration-300">
-              <img 
-                src="/src/assets/images/patoune_monogram_blason_1782742409538.jpg" 
-                alt="Patoune Blason Logo" 
-                className="w-full h-full object-cover scale-[1.05]"
-                referrerPolicy="no-referrer"
-              />
-            </span>
-            <div>
-              <h1 className="text-xl font-serif font-black text-charcoal-luxe tracking-tight leading-none uppercase">
-                {translations[language].brand}
-              </h1>
-              <span className="text-[9px] text-stone-500 tracking-widest font-bold font-mono uppercase block mt-1">
-                Nice • Cannes • Monaco
-              </span>
-            </div>
-          </div>
-
-          {/* Desktop Navigation Link TABS - Enhanced visibility: text-stone-900, larger font-bold & gorgeous prominent Palace button */}
-          <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-xs font-black tracking-wider uppercase text-stone-900">
-            <button onClick={() => scrollToSection('hero-section')} className="hover:text-riviera-azure transition-all duration-250 cursor-pointer hover:underline decoration-2 underline-offset-4">
-              {translations[language].navHome}
-            </button>
-            <button onClick={() => scrollToSection('about-section')} className="hover:text-riviera-azure transition-all duration-250 cursor-pointer hover:underline decoration-2 underline-offset-4">
-              {translations[language].navAbout}
-            </button>
-            <button 
-              onClick={() => scrollToSection('pricing-section')} 
-              className="bg-stone-950 hover:bg-black text-white font-mono font-black py-2.5 px-4 rounded-xl shadow-md border border-stone-800 hover:scale-[1.05] transition-all cursor-pointer flex items-center gap-2 text-[11px]"
-              title={language === 'fr' ? "Voir les tarifs Palace & Yachts" : "View Palace & Yacht rates"}
+          <nav className="hidden items-center gap-7 text-sm font-semibold md:flex" aria-label="Navigation">
+            {links.map((l) => (
+              <a key={l.href} href={l.href} className="hover:text-sky-deep">
+                {l.label}
+              </a>
+            ))}
+            <button
+              type="button"
+              onClick={() => setLang(lang === 'fr' ? 'en' : 'fr')}
+              className="rounded-full border border-navy/20 px-3 py-1 text-xs font-bold hover:bg-lavender"
+              aria-label={lang === 'fr' ? 'Switch to English' : 'Passer en français'}
             >
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-white animate-pulse"></span>
-              <span>{translations[language].navServices}</span>
+              {T.nav.lang[lang]}
             </button>
-            <button onClick={() => scrollToSection('blog-section')} className="hover:text-black transition-all duration-250 cursor-pointer hover:underline decoration-2 underline-offset-4">
-              {translations[language].navBlog}
-            </button>
+            <a href="#contact" className={`${BTN} bg-navy text-white hover:bg-navy/85`}>
+              {T.nav.contact[lang]}
+            </a>
           </nav>
-
-          {/* Actions: Language Toggle & Quick Reservation Button */}
-          <div className="hidden lg:flex items-center gap-4">
-            <a 
-              href="tel:+33763208713" 
-              className="px-4 py-2 border-2 border-black bg-stone-50 hover:bg-stone-150 rounded-xl transition-all text-xs font-bold font-mono text-stone-900 flex items-center gap-2 cursor-pointer shadow-xs"
-              title={language === 'fr' ? "Appeler directement" : "Call directly"}
-            >
-              <Phone className="h-3.5 w-3.5 text-stone-800" />
-              <span>+33 (0)7 63 20 87 13</span>
-            </a>
-
-            <button
-              onClick={toggleLanguage}
-              className="px-3.5 py-2 border border-stone-200 rounded-xl hover:bg-stone-100 hover:border-black transition-colors text-xs font-bold font-mono tracking-wider text-stone-700 flex items-center gap-1.5 cursor-pointer"
-              title={language === 'fr' ? "Switch to English" : "Passer en Français"}
-            >
-              <Globe className="h-3.5 w-3.5 text-stone-800" />
-              <span>{translations[language].langCode}</span>
-            </button>
-
-            <button
-              onClick={() => scrollToSection('reservation-section')}
-              className="px-5 py-2.5 bg-black hover:bg-stone-900 text-white font-extrabold text-xs tracking-wider uppercase rounded-xl shadow-md transition-all cursor-pointer hover:shadow-lg active:translate-y-0.5"
-            >
-              {translations[language].navBooking}
-            </button>
-          </div>
-
-          {/* Mobile Menu Action Icon */}
-          <div className="flex items-center gap-3 lg:hidden">
-            <button
-              onClick={toggleLanguage}
-              className="p-2 border border-stone-200 rounded-xl hover:bg-riviera-light transition-colors text-xs font-bold font-mono text-stone-700 flex items-center gap-1"
-            >
-              <Globe className="h-3.5 w-3.5 text-riviera-azure" />
-              <span>{translations[language].langCode}</span>
-            </button>
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 text-stone-700 hover:bg-stone-50 rounded-xl transition-colors outline-none"
-            >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-
+          <button
+            type="button"
+            className="rounded-lg p-2 md:hidden"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-expanded={menuOpen}
+            aria-label="Menu"
+          >
+            <span className="block text-2xl leading-none">{menuOpen ? '✕' : '☰'}</span>
+          </button>
         </div>
-
-        {/* Mobile Navigation Drawer Panels */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-stone-150 bg-white/95 backdrop-blur-md p-4 space-y-3 shadow-xl animate-in slide-in-from-top duration-200">
-            <a
-              href="tel:+33763208713"
-              className="block w-full text-center py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-xl font-extrabold transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              <Phone className="h-4 w-4 text-white animate-pulse" />
-              <span>+33 (0)7 63 20 87 13</span>
-            </a>
-
-            <button
-              onClick={() => scrollToSection('hero-section')}
-              className="block w-full text-left py-2 px-3 text-stone-700 hover:bg-riviera-light hover:text-riviera-azure rounded-xl font-bold transition-all"
-            >
-              {translations[language].navHome}
-            </button>
-            <button
-              onClick={() => scrollToSection('about-section')}
-              className="block w-full text-left py-2 px-3 text-stone-700 hover:bg-riviera-light hover:text-riviera-azure rounded-xl font-bold transition-all"
-            >
-              {translations[language].navAbout}
-            </button>
-            <button
-              onClick={() => { scrollToSection('pricing-section'); setMobileMenuOpen(false); }}
-              className="block w-full text-center py-3.5 px-4 bg-stone-900 hover:bg-stone-950 text-stone-100 font-mono font-black rounded-xl border border-stone-800 transition-all text-xs flex items-center justify-center gap-2.5 shadow-md"
-            >
-              <span className="inline-block w-2.5 h-2.5 rounded-full bg-stone-100 animate-pulse"></span>
-              <span>{translations[language].navServices}</span>
-            </button>
-            <button
-              onClick={() => scrollToSection('blog-section')}
-              className="block w-full text-left py-2 px-3 text-stone-700 hover:bg-riviera-light hover:text-stone-950 rounded-xl font-bold transition-all"
-            >
-              {translations[language].navBlog}
-            </button>
-            <button
-              onClick={() => scrollToSection('reservation-section')}
-              className="block w-full text-center py-3 bg-riviera-azure text-white rounded-xl font-extrabold transition-all shadow shadow-riviera-azure/20"
-            >
-              {translations[language].navBooking}
-            </button>
+        {menuOpen && (
+          <div className="border-t border-navy/5 bg-cream md:hidden">
+            <div className={`${SECTION} flex flex-col gap-1 py-3 text-base font-semibold`}>
+              {[...links, { href: '#contact', label: T.nav.contact[lang] }].map((l) => (
+                <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)} className="rounded-lg px-2 py-2.5 hover:bg-lavender">
+                  {l.label}
+                </a>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  setLang(lang === 'fr' ? 'en' : 'fr');
+                  setMenuOpen(false);
+                }}
+                className="mt-1 w-fit rounded-full border border-navy/20 px-4 py-1.5 text-sm font-bold"
+              >
+                {T.nav.lang[lang]}
+              </button>
+            </div>
           </div>
         )}
       </header>
 
-      {/* Exclusive Full-Width Hand-Drawn Palace Suite Illustration */}
-      <section className="w-full bg-stone-50 border-b border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="relative rounded-2xl overflow-hidden border-[6px] sm:border-[8px] border-white outline outline-1 outline-stone-300 shadow-md bg-white">
-            <div className="absolute inset-2 border border-black/5 pointer-events-none z-10"></div>
+      <main id="main">
+        {/* Hero */}
+        <section id="top" className="bg-gradient-to-b from-sky via-mint/60 to-cream">
+          <div className={`${SECTION} flex flex-col items-center py-14 text-center sm:py-20`}>
+            <p className="rounded-full bg-white/80 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-navy/70">
+              {T.hero.kicker[lang]}
+            </p>
+            <h1 className="mt-6 max-w-3xl font-display text-4xl font-semibold leading-[1.1] sm:text-6xl">
+              {T.hero.title[lang]}
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-navy/75">{T.hero.text[lang]}</p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <a href="#services" className={`${BTN} bg-navy text-white hover:bg-navy/85`}>
+                {T.hero.cta[lang]}
+              </a>
+              <a href="#estimer" className={`${BTN} bg-white text-navy ring-1 ring-navy/15 hover:bg-peach`}>
+                {T.hero.ctaEstimate[lang]}
+              </a>
+            </div>
             <img
-              src="/src/assets/images/palace_dog_butlers_sketch_1782744320697.jpg"
-              alt={language === 'fr' ? "Le Chien de Palace et ses Majordomes — Illustration Exclusive" : "The Palace Dog & his Butlers — Exclusive Illustration"}
-              className="w-full h-auto object-cover grayscale opacity-95 hover:opacity-100 transition-opacity duration-300"
-              referrerPolicy="no-referrer"
+              src={IMG.hero}
+              alt={lang === 'fr' ? 'Chat roux caressé et plissant les yeux de bonheur' : 'Ginger cat being stroked and squinting happily'}
+              className="mt-12 aspect-[16/9] w-full max-w-4xl rounded-[2rem] object-cover shadow-xl shadow-navy/10"
+              width={1408}
+              height={768}
+              fetchPriority="high"
             />
-            {/* Elegant luxury signature label */}
-            <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 bg-white/90 backdrop-blur-sm border border-stone-200 px-2.5 py-1 rounded-lg text-[8px] sm:text-[10px] font-mono tracking-widest text-stone-600 uppercase z-20 shadow-sm">
-              ✨ {language === 'fr' ? "Le Chien de Palace et ses Majordomes" : "The Palace Dog & Butlers"}
-            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Hero Section Banner layout */}
-      <section id="hero-section" className="relative bg-white pt-10 pb-20 md:py-24 overflow-hidden border-b border-stone-150">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          
-          {/* Left Hero texts */}
-          <div className="lg:col-span-6 space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 bg-riviera-light border border-riviera-azure/20 px-4 py-1.75 rounded-full text-riviera-azure font-semibold text-xs tracking-wider uppercase shadow-sm">
-              <Sparkles className="h-4 w-4 text-riviera-gold animate-pulse" />
-              <span className="font-bold">{translations[language].slogan}</span>
-            </div>
+        {/* Trust */}
+        <section aria-label={lang === 'fr' ? 'Garanties' : 'Guarantees'} className={`${SECTION} -mt-2 py-10`}>
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {T.trust.map((t) => (
+              <li key={t.title.fr} className="rounded-3xl bg-white p-6 shadow-sm ring-1 ring-navy/5">
+                <div className="text-3xl" aria-hidden="true">{t.icon}</div>
+                <h2 className="mt-3 font-display text-lg font-semibold">{t.title[lang]}</h2>
+                <p className="mt-1 text-sm leading-relaxed text-navy/70">{t.text[lang]}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif text-charcoal-luxe leading-[1.15] tracking-tight">
-              {translations[language].heroTitle.indexOf(' : ') !== -1 ? (
-                translations[language].heroTitle.split(' : ').map((part: string, idx: number) => (
-                  <span key={idx} className={idx === 1 ? "italic text-riviera-azure block font-medium" : "block font-extrabold"}>
-                    {part}
-                  </span>
-                ))
-              ) : (
-                <span className="block font-extrabold">
-                  {translations[language].heroTitle}
-                </span>
-              )}
-            </h2>
-
-            <p className="text-stone-600 text-base md:text-lg max-w-xl leading-relaxed font-sans">
-              {translations[language].heroSubtitle}
-            </p>
-
-            {/* Incredibly Prominent Direct Call Banner */}
-            <div className="bg-stone-50 border-2 border-black p-6 rounded-3xl space-y-3.5 shadow-sm max-w-lg relative overflow-hidden group hover:shadow-md transition-all transform hover:-translate-y-0.5 duration-300">
-              <div className="flex items-center gap-4.5">
-                <div className="h-14 w-14 rounded-2xl bg-black flex items-center justify-center text-white shrink-0 shadow-sm">
-                  <Phone className="h-7 w-7 text-white" />
-                </div>
-                <div>
-                  <span className="block text-[11px] uppercase tracking-widest font-black text-black font-mono">
-                    {language === 'fr' ? "Appel direct, SMS ou WhatsApp — 7j/7" : "Direct line — Calls, SMS & WhatsApp 7d/7"}
-                  </span>
-                  <a 
-                    href="tel:+33763208713" 
-                    className="block text-2.5xl sm:text-3.5xl font-mono font-black text-charcoal-luxe tracking-tight leading-none hover:text-stone-700 transition-colors mt-1.5"
-                  >
-                    +33 (0)7 63 20 87 13
-                  </a>
-                </div>
-              </div>
-              <div className="text-xs text-stone-600 font-medium pl-1 leading-relaxed border-l-2 border-black">
-                {language === 'fr' 
-                  ? "Des questions ou réservations immédiates ? Contactez-nous à tout moment, réponse rapide garantie."
-                  : "Have questions or prompt requests? Contact us instantly, fast and caring response guaranteed."}
-              </div>
-            </div>
-
-            {/* Service local highlight icons */}
-            <div className="grid grid-cols-3 gap-2 py-2 max-w-md font-mono text-[10px] font-bold text-stone-500 uppercase tracking-widest text-center">
-              <div className="bg-stone-50 p-2 border border-stone-150 rounded-xl flex flex-col items-center gap-1">
-                <Landmark className="h-4 w-4 text-riviera-azure" />
-                <span>MONACO</span>
-              </div>
-              <div className="bg-stone-50 p-2 border border-stone-150 rounded-xl flex flex-col items-center gap-1">
-                <Award className="h-4 w-4 text-riviera-gold" />
-                <span>NICE 06</span>
-              </div>
-              <div className="bg-stone-50 p-2 border border-stone-150 rounded-xl flex flex-col items-center gap-1">
-                <Sparkles className="h-4 w-4 text-riviera-azure" />
-                <span>CANNES</span>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-4.5 pt-2">
-              <button
-                onClick={() => scrollToSection('reservation-section')}
-                className="px-8 py-4 bg-black hover:bg-stone-900 text-white font-extrabold rounded-2xl transition-all shadow-md text-center cursor-pointer hover:shadow-lg active:translate-y-0.5 hover:scale-[1.02]"
-              >
-                {translations[language].heroCtas}
-              </button>
-              {/* Added B2B direct Espace Pro link button inside the Hero as requested */}
-              <button
-                onClick={() => scrollToSection('concierge-section')}
-                className="px-6 py-4 bg-stone-50 hover:bg-stone-150 text-stone-900 font-mono font-black rounded-2xl border border-stone-300 shadow-sm text-xs tracking-wider uppercase text-center transition-all cursor-pointer hover:scale-[1.03] flex items-center justify-center gap-2"
-              >
-                💼 {language === 'fr' ? "Tarifs Hôtels / Yachts (Pro)" : "Pro rates (Hotel & Yacht)"}
-              </button>
-            </div>
-
-            {/* Quick stats panels */}
-            <div className="pt-8 border-t border-stone-100 grid grid-cols-3 gap-4">
-              <div>
-                <span className="block text-2xl md:text-3xl font-serif font-black text-riviera-azure">50+</span>
-                <span className="text-xs text-stone-500">{translations[language].statClients}</span>
-              </div>
-              <div>
-                <span className="block text-2xl md:text-3xl font-serif font-black text-riviera-azure">100</span>
-                <span className="text-xs text-stone-500">{translations[language].statVisits}</span>
-              </div>
-              <div>
-                <span className="block text-2xl md:text-3xl font-serif font-black text-riviera-azure">99%</span>
-                <span className="text-xs text-stone-500">{translations[language].statReviews}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Hero: Interactive "At a Glance" Key Info Dashboard Widget */}
-          <div className="lg:col-span-6 space-y-6 relative">
-
-            {/* Interactive "At a Glance" Key Info Dashboard Widget */}
-            <div className="relative bg-stone-900 border border-stone-800 text-white rounded-3xl p-6 shadow-xl font-sans space-y-6">
-              {/* Header inside widget */}
-              <div className="flex items-center justify-between border-b border-stone-800 pb-3">
-                <div>
-                  <h3 className="text-lg font-serif font-black tracking-tight text-white uppercase">
-                    {language === 'fr' ? "Infos Clés en 1 clin d'œil" : "Key Info at a Glance"}
-                  </h3>
-                  <p className="text-[10px] font-mono text-stone-400 uppercase tracking-wider">
-                    {language === 'fr' ? "Sélectionnez un onglet ci-dessous" : "Select a tab below to learn more"}
-                  </p>
-                </div>
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" title="Disponible"></span>
-              </div>
-
-              {/* High Contrast Compact Tabs Navigation */}
-              <div className="grid grid-cols-4 gap-1 p-1 bg-stone-950 rounded-xl border border-stone-850">
-                <button
-                  onClick={() => setActiveTab('where')}
-                  className={`py-2 px-1 text-center rounded-lg text-[10.5px] font-black tracking-tight uppercase transition-all duration-200 cursor-pointer ${
-                    activeTab === 'where'
-                      ? 'bg-white text-stone-950 shadow-sm font-black'
-                      : 'text-stone-450 hover:text-white hover:bg-stone-900/50'
-                  }`}
+        {/* Services */}
+        <section id="services" className="bg-peach/50 py-16 sm:py-20">
+          <div className={SECTION}>
+            <Eyebrow>{T.services.eyebrow[lang]}</Eyebrow>
+            <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{T.services.title[lang]}</h2>
+            <p className="mx-auto mt-3 max-w-2xl text-center text-navy/70">{T.services.intro[lang]}</p>
+            <div className="mt-10 grid gap-6 md:grid-cols-3">
+              {T.services.items.map((s) => (
+                <article
+                  key={s.name.fr}
+                  className={`relative flex flex-col rounded-3xl bg-white p-7 shadow-sm ${s.popular ? 'ring-2 ring-peach-deep' : 'ring-1 ring-navy/5'}`}
                 >
-                  📍 {language === 'fr' ? "Où" : "Areas"}
-                </button>
-                <button
-                  onClick={() => setActiveTab('safety')}
-                  className={`py-2 px-1 text-center rounded-lg text-[10.5px] font-black tracking-tight uppercase transition-all duration-200 cursor-pointer ${
-                    activeTab === 'safety'
-                      ? 'bg-white text-stone-950 shadow-sm font-black'
-                      : 'text-stone-450 hover:text-white hover:bg-stone-900/50'
-                  }`}
-                >
-                  🔒 {language === 'fr' ? "Sûreté" : "Safety"}
-                </button>
-                <button
-                  onClick={() => setActiveTab('pricing')}
-                  className={`py-2 px-1 text-center rounded-lg text-[10.5px] font-black tracking-tight uppercase transition-all duration-200 cursor-pointer ${
-                    activeTab === 'pricing'
-                      ? 'bg-white text-stone-950 shadow-sm font-black'
-                      : 'text-stone-450 hover:text-white hover:bg-stone-900/50'
-                  }`}
-                >
-                  💰 {language === 'fr' ? "Tarifs" : "Rates"}
-                </button>
-                <button
-                  onClick={() => setActiveTab('contact')}
-                  className={`py-2 px-1 text-center rounded-lg text-[10.5px] font-black tracking-tight uppercase transition-all duration-200 cursor-pointer ${
-                    activeTab === 'contact'
-                      ? 'bg-white text-stone-950 shadow-sm font-black'
-                      : 'text-stone-450 hover:text-white hover:bg-stone-900/50'
-                  }`}
-                >
-                  📞 {language === 'fr' ? "Contact" : "Direct"}
-                </button>
-              </div>
-
-              {/* Dynamic Content Display with micro animations */}
-              <div className="min-h-[160px] flex flex-col justify-between pt-1">
-                {activeTab === 'where' && (
-                  <div className="space-y-3.5">
-                    <span className="block text-[10px] font-mono uppercase tracking-widest text-stone-400 font-extrabold">📍 Zones de Service & Déplacements</span>
-                    <div className="flex flex-wrap gap-2">
-                      {['Nice', 'Monaco', 'Cannes', 'Antibes', 'Cap d\'Ail', 'Villefranche-sur-Mer', 'Saint-Jean-Cap-Ferrat'].map((city) => (
-                        <span key={city} className="px-2 py-0.5 bg-stone-950 border border-stone-800 text-stone-200 text-[11px] font-semibold rounded-lg">
-                          {city}
-                        </span>
-                      ))}
-                    </div>
-                    <p className="text-xs text-stone-300 leading-relaxed font-sans">
-                      {language === 'fr'
-                        ? "Intervention sur-mesure à domicile, en hôtel 5★/Palace, villa & yacht. Sophie se déplace sous 2 heures d'appel."
-                        : "Bespoke service at your private home, 5-star hotel suite, villa, or private superyacht. Speedy 2-hour response time."}
-                    </p>
-                  </div>
-                )}
-
-                {activeTab === 'safety' && (
-                  <div className="space-y-3.5">
-                    <span className="block text-[10px] font-mono uppercase tracking-widest text-stone-400 font-extrabold">🔒 Garanties Officielles d'Élite</span>
-                    <ul className="space-y-2 text-xs text-stone-200 font-sans">
-                      <li className="flex items-center gap-2">
-                        <span className="text-emerald-400">✔</span>
-                        <span><strong>{language === 'fr' ? "Agrément d'État (ACACED)" : "Official ACACED License"}</strong> (DDPP n°2023/182-A)</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-emerald-400">✔</span>
-                        <span><strong>{language === 'fr' ? "Assurance Allianz RC Pro" : "Allianz Business Insurance"}</strong> {language === 'fr' ? "spécifique garde d'animaux de valeur" : "for high-value breeds custody"}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-emerald-400">✔</span>
-                        <span><strong>{language === 'fr' ? "Savoir-faire Luxe (ESSEC)" : "Luxury Standards (ESSEC)"}</strong> {language === 'fr' ? "diplômée Grande École" : "Grande École alumna"}</span>
-                      </li>
-                    </ul>
-                  </div>
-                )}
-
-                {activeTab === 'pricing' && (
-                  <div className="space-y-3">
-                    <span className="block text-[10px] font-mono uppercase tracking-widest text-stone-400 font-extrabold">💰 Tarifs de Référence Simples</span>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-stone-950 p-2.5 rounded-xl border border-stone-850 flex justify-between items-center">
-                        <span className="text-[11px] text-stone-400 font-medium">{language === 'fr' ? "À l'heure" : "Hourly"}</span>
-                        <span className="font-mono font-bold text-white text-xs">45 € / H</span>
-                      </div>
-                      <div className="bg-stone-950 p-2.5 rounded-xl border border-stone-850 flex justify-between items-center">
-                        <span className="text-[11px] text-stone-400 font-medium">{language === 'fr' ? "Demi-Journée" : "Half-Day"}</span>
-                        <span className="font-mono font-bold text-white text-xs">150 €</span>
-                      </div>
-                      <div className="bg-stone-950 p-2.5 rounded-xl border border-stone-850 flex justify-between items-center">
-                        <span className="text-[11px] text-stone-400 font-medium">{language === 'fr' ? "Journée (8H)" : "Full Day"}</span>
-                        <span className="font-mono font-bold text-white text-xs">280 €</span>
-                      </div>
-                      <div className="bg-stone-950 p-2.5 rounded-xl border border-stone-850 flex justify-between items-center">
-                        <span className="text-[11px] text-stone-400 font-medium">{language === 'fr' ? "Forfait 24H" : "24h Stay"}</span>
-                        <span className="font-mono font-bold text-white text-xs">350 €</span>
-                      </div>
-                    </div>
-                    <span className="block text-[10.5px] text-stone-400 font-sans italic">
-                      {language === 'fr' ? "* Tarification transparente tout inclus, aucun frais caché." : "* Fully transparent prices, zero hidden fees."}
+                  {s.popular && (
+                    <span className="absolute -top-3 left-7 rounded-full bg-peach-deep px-3 py-1 text-xs font-bold text-white">
+                      {lang === 'fr' ? 'Le plus demandé' : 'Most popular'}
                     </span>
-                  </div>
-                )}
-
-                {activeTab === 'contact' && (
-                  <div className="space-y-3.5">
-                    <span className="block text-[10px] font-mono uppercase tracking-widest text-stone-400 font-extrabold">📞 Ligne de Garde Directe</span>
-                    <div className="space-y-1.5">
-                      <a href="tel:+33763208713" className="flex items-center gap-2 px-3 py-2 bg-white text-stone-950 rounded-xl hover:bg-stone-100 transition-all font-mono font-bold text-xs justify-center">
-                        📞 {language === 'fr' ? "Appeler Sophie" : "Call Sophie"} : +33 7 63 20 87 13
-                      </a>
-                      <a href="https://wa.me/33763208713" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all font-mono font-bold text-xs justify-center">
-                        💬 WhatsApp direct
-                      </a>
-                    </div>
-                    <div className="text-[10px] text-center text-stone-400 font-mono mt-1 select-all">
-                      contact@patounecoteazur.fr
-                    </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                  <div className="text-3xl" aria-hidden="true">{s.icon}</div>
+                  <h3 className="mt-3 font-display text-xl font-semibold">{s.name[lang]}</h3>
+                  <p className="mt-3">
+                    <span className="text-sm text-navy/60">{T.services.from[lang]} </span>
+                    <span className="font-display text-4xl font-semibold">{s.price}</span>{' '}
+                    <span className="text-sm text-navy/60">{s.unit[lang]}</span>
+                  </p>
+                  <ul className="mt-5 space-y-2 text-sm leading-relaxed">
+                    {s.points[lang].map((p) => (
+                      <li key={p} className="flex gap-2">
+                        <span className="text-mint-deep" aria-hidden="true">✓</span>
+                        {p}
+                      </li>
+                    ))}
+                  </ul>
+                  <a href="#contact" className={`${BTN} mt-7 bg-mint text-navy hover:bg-mint-deep hover:text-white`}>
+                    {T.hero.cta2[lang]}
+                  </a>
+                </article>
+              ))}
             </div>
-            {/* Absolute background warm design blobs to enrich visual appeal */}
-            <div className="absolute -z-10 -bottom-4 -right-4 w-72 h-72 bg-riviera-azure/10 rounded-full blur-3xl"></div>
-            <div className="absolute -z-10 -top-10 -left-10 w-48 h-48 bg-riviera-gold/10 rounded-full blur-2xl"></div>
+            <p className="mt-6 text-center text-sm text-navy/60">{T.services.note[lang]}</p>
           </div>
+        </section>
 
-        </div>
-      </section>
+        {/* How */}
+        <section className={`${SECTION} py-16 sm:py-20`}>
+          <Eyebrow>{T.how.eyebrow[lang]}</Eyebrow>
+          <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{T.how.title[lang]}</h2>
+          <ol className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {T.how.steps.map((s, i) => (
+              <li key={s.title.fr} className="rounded-3xl bg-lavender/70 p-7">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-navy font-display text-lg text-white">{i + 1}</span>
+                  <span className="text-2xl" aria-hidden="true">{s.icon}</span>
+                </div>
+                <h3 className="mt-4 font-display text-xl font-semibold">{s.title[lang]}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-navy/75">{s.text[lang]}</p>
+              </li>
+            ))}
+          </ol>
+        </section>
 
-      {/* Qui suis-je ? (About Sophie) section */}
-      <section id="about-section" className="py-20 md:py-24 bg-stone-50 border-b border-stone-250/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <AboutSophie language={language} />
-        </div>
-      </section>
+        <Estimator lang={lang} />
 
-      {/* Pricing / Tiers section */}
-      <section id="pricing-section" className="py-20 md:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-stone-150/60 space-y-16">
-        {/* Luxury Concierge & Palace Hotels partnerships section */}
-        <div id="concierge-section">
-          <ConciergeSection
-            language={language}
-            onSelectFormula={handleSelectPlanFromPricing}
-          />
-        </div>
-      </section>
-
-      {/* Instagram Feed section has been removed to simplify user experience as requested */}
-
-      {/* Fake customer reviews section */}
-      <section id="reviews-section" className="py-20 md:py-28 bg-white border-b border-stone-150">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Testimonials
-            testimonials={TESTIMONIALS}
-            language={language}
-            translations={translations}
-          />
-        </div>
-      </section>
-
-      {/* Blog & advice section */}
-      <section id="blog-section" className="py-20 md:py-28 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-b border-stone-200">
-        <BlogSection
-          posts={blogPosts}
-          onAddPost={handleAddNewPost}
-          language={language}
-          translations={translations}
-        />
-      </section>
-
-      {/* Direct Contact area */}
-      <section id="reservation-section" className="py-20 md:py-28 bg-stone-50 border-y border-stone-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ContactVip language={language} />
-        </div>
-      </section>
-
-      {/* Real Footer with Bilingual navigation */}
-      <footer className="bg-charcoal-luxe text-white pt-16 pb-12 border-t border-stone-850">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
-          {/* Logo brand info */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="h-10 w-10 rounded-full overflow-hidden border border-stone-800 flex items-center justify-center bg-white">
-                <img 
-                  src="/src/assets/images/patoune_monogram_blason_1782742409538.jpg" 
-                  alt="Patoune Blason Logo" 
-                  className="w-full h-full object-cover scale-[1.05]"
-                  referrerPolicy="no-referrer"
-                />
-              </span>
-              <span className="text-lg font-serif font-black tracking-tight uppercase">{translations[language].brand}</span>
+        {/* Gallery */}
+        <section className="bg-sky/50 py-16 sm:py-20">
+          <div className={SECTION}>
+            <Eyebrow>{T.gallery.eyebrow[lang]}</Eyebrow>
+            <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{T.gallery.title[lang]}</h2>
+            <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3">
+              {IMG.gallery.map((g) => (
+                <img key={g.src} src={g.src} alt={g.alt[lang]} loading="lazy" className="aspect-square w-full rounded-3xl object-cover" />
+              ))}
             </div>
-            <p className="text-xs text-stone-400 font-sans leading-relaxed">
-              {translations[language].footerDesc}
-            </p>
-            <div className="flex flex-col gap-2 pt-1">
-              <div className="text-xs text-riviera-gold font-bold font-mono flex items-center gap-1.5">
-                <span>📞</span>
-                <span>+33 (0)7 63 20 87 13</span>
+          </div>
+        </section>
+
+        {/* About */}
+        <section id="about" className={`${SECTION} py-16 sm:py-20`}>
+          <div className="grid items-center gap-10 md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+            <img
+              src={IMG.sophie}
+              alt={lang === 'fr' ? 'Sophie, pet sitter, sur un balcon face à la Baie des Anges' : 'Sophie, pet sitter, on a balcony overlooking the Baie des Anges'}
+              loading="lazy"
+              className="mx-auto aspect-[3/4] w-full max-w-sm rounded-[2rem] object-cover shadow-lg shadow-navy/10"
+            />
+            <div>
+              <h2 className="font-display text-3xl font-semibold sm:text-4xl">{T.about.title[lang]}</h2>
+              <div className="mt-5 space-y-4 text-lg leading-relaxed text-navy/80">
+                {T.about.text.map((p) => (
+                  <p key={p.fr}>{p[lang]}</p>
+                ))}
               </div>
-              <a 
-                href="mailto:contact@patounecoteazur.fr"
-                className="text-xs text-white hover:text-riviera-gold transition-colors font-mono font-bold flex items-center gap-1.5"
-                title="Send Email"
-              >
-                <span>✉️</span>
-                <span>contact@patounecoteazur.fr</span>
+              <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className={`${BTN} mt-7 bg-white text-navy ring-1 ring-navy/15 hover:bg-peach`}>
+                Instagram @patounenice
               </a>
             </div>
           </div>
+        </section>
 
-          {/* Quick link */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-riviera-gold font-mono">Nice Area</h4>
-            <ul className="text-xs text-stone-450 space-y-1.5 font-sans">
-              <li>Nice Promenade des Anglais</li>
-              <li>Cimiez & Mont Boron pet parks</li>
-              <li>Villefranche-sur-Mer</li>
-            </ul>
+        {/* Reviews */}
+        <section id="avis" className="bg-mint/50 py-16 sm:py-20">
+          <div className={SECTION}>
+            <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{T.reviews.title[lang]}</h2>
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {T.reviews.items.map((r) => (
+                <figure key={r.name} className="rounded-3xl bg-white p-7 shadow-sm">
+                  <div className="text-peach-deep" aria-label="5/5">★★★★★</div>
+                  <blockquote className="mt-3 text-lg leading-relaxed">“{r.text[lang]}”</blockquote>
+                  <figcaption className="mt-4 text-sm font-bold text-navy/70">
+                    {r.name} · {r.cat}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
+        </section>
 
-          {/* Monaco / Cannes */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-riviera-gold font-mono font-semibold">Monaco & Cannes</h4>
-            <ul className="text-xs text-stone-450 space-y-1.5 font-sans">
-              <li>Monaco Monte-Carlo Larvotto</li>
-              <li>Cannes Croisette, Le Cannet</li>
-              <li>Antibes Juan-les-Pins</li>
-            </ul>
+        {/* Zones */}
+        <section className={`${SECTION} py-16 text-center sm:py-20`}>
+          <h2 className="font-display text-3xl font-semibold sm:text-4xl">{T.zones.title[lang]}</h2>
+          <p className="mt-3 text-navy/70">{T.zones.text[lang]}</p>
+          <ul className="mt-7 flex flex-wrap justify-center gap-2.5">
+            {ZONES.map((z) => (
+              <li key={z} className="rounded-full bg-lavender px-4 py-2 text-sm font-semibold">
+                {z}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="bg-lavender/50 py-16 sm:py-20">
+          <div className="mx-auto max-w-3xl px-5 sm:px-8">
+            <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{T.faq.title[lang]}</h2>
+            <div className="mt-10 space-y-3">
+              {T.faq.items.map((f, i) => {
+                const open = openFaq === i;
+                return (
+                  <div key={f.q.fr} className="rounded-2xl bg-white shadow-sm">
+                    <h3>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between gap-4 px-6 py-4 text-left font-bold"
+                        aria-expanded={open}
+                        onClick={() => setOpenFaq(open ? null : i)}
+                      >
+                        {f.q[lang]}
+                        <span aria-hidden="true" className="text-xl">{open ? '−' : '+'}</span>
+                      </button>
+                    </h3>
+                    {open && <p className="px-6 pb-5 leading-relaxed text-navy/75">{f.a[lang]}</p>}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+        </section>
 
-          {/* Commitment detail */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-widest text-stone-300 font-mono">
-              {language === 'fr' ? "Qualité & Engagement" : "Quality & Caring"}
-            </h4>
-            <p className="text-[11px] text-stone-400 leading-relaxed font-sans">
-              {language === 'fr'
-                ? "Nous privilégions un service d'excellence, discret et sur-mesure pour chacun de vos compagnons à Nice, Cannes et Monaco."
-                : "We prioritize a discreet, tailored service of elite standards for your precious companions in Nice, Cannes, and Monaco."}
-            </p>
+        <section className={`${SECTION} py-14`}>
+          <Eyebrow>{T.more.eyebrow[lang]}</Eyebrow>
+          <div className="grid gap-5 md:grid-cols-2">
+            <a href="#estimer" className="rounded-3xl bg-peach p-8 text-center transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="text-3xl" aria-hidden="true">🧮</div>
+              <p className="mt-2 font-display text-xl font-semibold">{T.hero.ctaEstimate[lang]}</p>
+            </a>
+            <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="rounded-3xl bg-sky p-8 text-center transition hover:-translate-y-0.5 hover:shadow-md">
+              <div className="text-3xl" aria-hidden="true">📷</div>
+              <p className="mt-2 font-display text-xl font-semibold">{T.more.insta[lang]}</p>
+            </a>
           </div>
-        </div>
+        </section>
 
-        {/* Legal copyright bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-stone-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-500 font-mono">
-          <p className="text-center sm:text-left w-full sm:w-auto">
-            {translations[language].footerCopyright}
+        <ContactForm lang={lang} />
+      </main>
+
+      <footer className="bg-navy py-10 text-white">
+        <div className={`${SECTION} flex flex-col items-center gap-3 text-center text-sm`}>
+          <p className="font-display text-xl">🐾 Patoune Côte d’Azur</p>
+          <p className="text-white/70">{T.footer.text[lang]}</p>
+          <p className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+            <a href={CONTACT.phoneHref} className="hover:underline">{CONTACT.phone}</a>
+            <a href={`mailto:${CONTACT.email}`} className="hover:underline">{CONTACT.email}</a>
+            <a href={CONTACT.instagram} target="_blank" rel="noopener noreferrer" className="hover:underline">Instagram</a>
           </p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-riviera-gold transition-colors">{translations[language].footerLinks}</a>
-          </div>
+          <p className="text-xs text-white/50">© {new Date().getFullYear()} Patoune Côte d’Azur. {T.footer.rights[lang]}</p>
         </div>
       </footer>
     </div>
+  );
+}
+
+function ContactForm({ lang }: { lang: Lang }) {
+  const f = T.form;
+  const [service, setService] = useState(T.services.items[0].name[lang]);
+  const serviceNames = T.services.items.map((s) => s.name[lang]);
+
+  useEffect(() => {
+    setService((cur) => {
+      const idx = T.services.items.findIndex((s) => s.name.fr === cur || s.name.en === cur);
+      return T.services.items[Math.max(idx, 0)].name[lang];
+    });
+  }, [lang]);
+
+  function buildMessage(form: HTMLFormElement) {
+    const d = new FormData(form);
+    const v = (k: string) => String(d.get(k) ?? '').trim();
+    const lines = [
+      f.hello[lang],
+      '',
+      `${f.name[lang]} : ${v('name')}`,
+      `${f.phone[lang]} : ${v('phone')}`,
+      `${f.email[lang]} : ${v('email')}`,
+      `${f.city[lang]} : ${v('city')}`,
+      `${f.cat[lang]} : ${v('cat')}`,
+      `${f.start[lang]} ${v('start')} ${f.end[lang].toLowerCase()} ${v('end')}`,
+      `${f.service[lang]} : ${v('service')}`,
+    ];
+    if (v('notes')) lines.push('', `${f.notes[lang]} : ${v('notes')}`);
+    return lines.join('\n');
+  }
+
+  function send(e: FormEvent<HTMLFormElement>, channel: 'whatsapp' | 'mail') {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const msg = buildMessage(form);
+    if (channel === 'whatsapp') {
+      window.open(`https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+    } else {
+      const subject = lang === 'fr' ? 'Demande de garde de chat' : 'Cat sitting request';
+      window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
+    }
+  }
+
+  const field =
+    'mt-1.5 w-full rounded-xl border border-navy/15 bg-white px-4 py-3 text-base outline-none focus:border-sky-deep focus:ring-4 focus:ring-sky-deep/30';
+  const label = 'block text-sm font-bold';
+
+  return (
+    <section id="contact" className={`${SECTION} py-16 sm:py-20`}>
+      <div className="mx-auto max-w-3xl rounded-[2rem] bg-white p-6 shadow-lg shadow-navy/5 ring-1 ring-navy/5 sm:p-10">
+        <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{f.title[lang]}</h2>
+        <p className="mx-auto mt-3 max-w-xl text-center text-navy/70">{f.intro[lang]}</p>
+        <form
+          className="mt-8 grid gap-5 sm:grid-cols-2"
+          onSubmit={(e) => send(e, 'whatsapp')}
+        >
+          <label className={label}>
+            {f.name[lang]}
+            <input name="name" required autoComplete="name" className={field} />
+          </label>
+          <label className={label}>
+            {f.phone[lang]}
+            <input name="phone" type="tel" required autoComplete="tel" className={field} />
+          </label>
+          <label className={label}>
+            {f.email[lang]}
+            <input name="email" type="email" required autoComplete="email" className={field} />
+          </label>
+          <label className={label}>
+            {f.city[lang]}
+            <input name="city" required className={field} />
+          </label>
+          <label className={label}>
+            {f.cat[lang]}
+            <input name="cat" required className={field} />
+          </label>
+          <label className={label}>
+            {f.service[lang]}
+            <select name="service" value={service} onChange={(e) => setService(e.target.value)} className={field}>
+              {serviceNames.map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+          </label>
+          <label className={label}>
+            {f.start[lang]}
+            <input name="start" type="date" required className={field} />
+          </label>
+          <label className={label}>
+            {f.end[lang]}
+            <input name="end" type="date" required className={field} />
+          </label>
+          <label className={`${label} sm:col-span-2`}>
+            {f.notes[lang]}
+            <textarea name="notes" rows={4} className={field} />
+          </label>
+          <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row">
+            <button type="submit" className={`${BTN} flex-1 bg-mint-deep text-white hover:bg-mint-deep/85`}>
+              💬 {f.whatsapp[lang]}
+            </button>
+            <button
+              type="button"
+              className={`${BTN} flex-1 bg-navy text-white hover:bg-navy/85`}
+              onClick={(e) => {
+                const form = e.currentTarget.form!;
+                if (form.reportValidity()) {
+                  const msg = buildMessage(form);
+                  const subject = lang === 'fr' ? 'Demande de garde de chat' : 'Cat sitting request';
+                  window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
+                }
+              }}
+            >
+              ✉️ {f.mail[lang]}
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  );
+}
+
+function Estimator({ lang }: { lang: Lang }) {
+  const e = T.estimate;
+  const [idx, setIdx] = useState(0);
+  const [qty, setQty] = useState(5);
+  const plan = T.services.items[idx];
+  const total = plan.amount * qty;
+
+  return (
+    <section id="estimer" className="bg-lavender/60 py-16 sm:py-20">
+      <div className="mx-auto max-w-2xl px-5 sm:px-8">
+        <Eyebrow>{e.eyebrow[lang]}</Eyebrow>
+        <h2 className="text-center font-display text-3xl font-semibold sm:text-4xl">{e.title[lang]}</h2>
+        <div className="mt-8 rounded-[2rem] bg-white p-6 shadow-sm sm:p-8">
+          <label className="block text-sm font-bold">
+            {e.plan[lang]}
+            <select
+              value={idx}
+              onChange={(ev) => setIdx(Number(ev.target.value))}
+              className="mt-1.5 w-full rounded-xl border border-navy/15 bg-white px-4 py-3 text-base outline-none focus:border-sky-deep focus:ring-4 focus:ring-sky-deep/30"
+            >
+              {T.services.items.map((s, i) => (
+                <option key={s.name.fr} value={i}>
+                  {s.name[lang]} ({s.price} {s.unit[lang]})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="mt-5 block text-sm font-bold">
+            {plan.per === 'visit' ? e.qtyVisits[lang] : e.qtyDays[lang]} : {qty}
+            <input
+              type="range"
+              min={1}
+              max={30}
+              value={qty}
+              onChange={(ev) => setQty(Number(ev.target.value))}
+              className="mt-3 w-full accent-navy"
+            />
+          </label>
+          <div className="mt-6 rounded-2xl bg-mint/70 p-5 text-center">
+            <p className="text-sm font-bold text-navy/60">{e.total[lang]}</p>
+            <p className="font-display text-5xl font-semibold" aria-live="polite">{total} €</p>
+          </div>
+          <p className="mt-3 text-center text-xs text-navy/55">{e.note[lang]}</p>
+          <a href="#contact" className={`${BTN} mt-5 w-full bg-navy text-white hover:bg-navy/85`}>
+            {e.cta[lang]}
+          </a>
+        </div>
+      </div>
+    </section>
   );
 }

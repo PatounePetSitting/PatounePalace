@@ -1,32 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Playfair Display", Georgia, serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-
-  /* Custom Luxury Black & White Sovereign Brand Colors (Noir & Blanc - Diptyque & Palace Style) */
-  --color-riviera-azure: #000000;       /* Solid Sovereign Black */
-  --color-riviera-light: #F7F7F7;       /* Soft luxury off-white */
-  --color-riviera-gold: #000000;        /* Pure obsidian black */
-  --color-riviera-sand: #EAEAEA;        /* Delicate stone gray */
-  --color-riviera-deep: #111111;        /* Rich dark carbon */
-  --color-riviera-terracotta: #1A1A1A;  /* Charcoal black */
-  --color-villa-cream: #FFFFFF;         /* Crisp chalk white */
-  --color-charcoal-luxe: #000000;       /* Sovereign deep black */
+  --color-sky: #dff0fb;
+  --color-sky-deep: #8cc7ea;
+  --color-mint: #dcf3e8;
+  --color-mint-deep: #5fb996;
+  --color-peach: #ffe6d6;
+  --color-peach-deep: #f4a784;
+  --color-lavender: #ebe5f8;
+  --color-navy: #14284b;
+  --color-cream: #fffaf5;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Nunito Sans", system-ui, sans-serif;
 }
 
-@keyframes marquee {
-  0% { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5rem;
 }
 
-.animate-marquee {
-  animation: marquee 35s linear infinite;
+body {
+  margin: 0;
+  background: var(--color-cream);
+  color: var(--color-navy);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Pause scroll animation on mouse hover for high usability */
-.animate-marquee:hover {
-  animation-play-state: paused;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
