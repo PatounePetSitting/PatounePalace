@@ -38,6 +38,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 @keyframes pcTilt{0%,100%{transform:rotate(0) translateY(0)}15%{transform:rotate(-9deg)}30%{transform:rotate(0)}45%{transform:rotate(7deg)}60%{transform:rotate(0) translateY(0)}70%{transform:translateY(-0.18em)}78%{transform:translateY(0)}84%{transform:translateY(-0.06em)}90%{transform:translateY(0)}}
 @keyframes pcPounce{0%,45%{transform:translate(0,0) scale(1,1)}58%{transform:translate(0.05em,0) scale(1.08,0.86)}68%{transform:translate(-0.3em,-0.45em) scale(0.95,1.08)}78%{transform:translate(-0.35em,0) scale(1.06,0.9)}86%,100%{transform:translate(0,0) scale(1,1)}}
 @keyframes pcStretch{0%,100%{transform:scale(1,1)}35%{transform:scale(1.1,0.93)}50%{transform:scale(1.1,0.93) rotate(-2deg)}70%{transform:scale(1,1)}}
+@keyframes pcTwinkle{0%,100%{opacity:.25;transform:scale(.6) rotate(0)}50%{opacity:1;transform:scale(1.1) rotate(45deg)}}
+@keyframes pcStep{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@media (prefers-reduced-motion: reduce){.pc-cat,.pc-star{animation:none!important}}
 @media (max-width:700px){header nav{gap:14px!important;font-size:15px!important}}
 </style>
 </head>
