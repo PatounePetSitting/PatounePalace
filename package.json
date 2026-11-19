@@ -1,27 +1,15 @@
 {
   "name": "patoune-cote-dazur",
   "private": true,
-  "version": "2.0.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "preview": "vite preview"
   },
-  "dependencies": {
-    "leaflet": "^1.9.4",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.14",
-    "@types/leaflet": "^1.9.22",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@vitejs/plugin-react": "^5.0.4",
-    "tailwindcss": "^4.1.14",
-    "typescript": "~5.8.2",
     "vite": "^6.2.3"
   }
 }
